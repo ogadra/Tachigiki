@@ -10,6 +10,7 @@ import (
 	"github.com/ogadra/Tachigiki/internal/config"
 	"github.com/ogadra/Tachigiki/internal/fetch"
 	_ "github.com/ogadra/Tachigiki/internal/fetch/adapters"
+	"github.com/ogadra/Tachigiki/internal/publish"
 	"github.com/ogadra/Tachigiki/internal/translate"
 	"github.com/ogadra/Tachigiki/internal/tts"
 )
@@ -37,6 +38,9 @@ func main() {
 		log.Fatal(err)
 	}
 	if err := assemble.Run(ctx, day, scriptDir, audioDir, outDir); err != nil {
+		log.Fatal(err)
+	}
+	if err := publish.Run(ctx, day, outDir); err != nil {
 		log.Fatal(err)
 	}
 }
