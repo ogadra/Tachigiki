@@ -101,7 +101,6 @@ func claude(ctx context.Context, article []byte) (*output, error) {
 	return res.StructuredOutput, nil
 }
 
-// ReadLevel は Run が書き出した dir/{level}.json を読む。
 func ReadLevel(dir, level string) ([]Article, error) {
 	b, err := os.ReadFile(filepath.Join(dir, level+".json"))
 	if err != nil {

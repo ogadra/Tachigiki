@@ -1,4 +1,3 @@
-// Package tts は英文をKokoro、和訳をVOICEVOXで合成し、文ごとのWAVを書き出す。
 package tts
 
 import (
@@ -22,15 +21,14 @@ const (
 	voicevoxVoice = "3"
 )
 
-// SegmentPath は記事 a の文 s (タイトルは s = -1) の lang 音声の置き場所を返す。
-func SegmentPath(dir string, a, s int, lang string) string {
-	if s < 0 {
-		return filepath.Join(dir, fmt.Sprintf("%d-title-%s.wav", a, lang))
-	}
-	return filepath.Join(dir, fmt.Sprintf("%d-%d-%s.wav", a, s, lang))
+func TitlePath(dir string, article int, lang string) string {
+	return filepath.Join(dir, fmt.Sprintf("%d-title-%s.wav", article, lang))
 }
 
-// Run は scriptDir の {level}.json をすべて読み、outDir/{level}/ に文ごとのWAVを書き出す。
+func SentencePath(dir string, article, sentence int, lang string) string {
+	return filepath.Join(dir, fmt.Sprintf("%d-%d-%s.wav", article, sentence, lang))
+}
+
 func Run(ctx context.Context, scriptDir, outDir string) error {
 	for _, lv := range translate.Levels {
 		articles, err := translate.ReadLevel(scriptDir, lv)
@@ -42,26 +40,32 @@ func Run(ctx context.Context, scriptDir, outDir string) error {
 			return err
 		}
 		for ai, a := range articles {
-			pairs := append([]translate.Pair{a.Title}, a.Sentences...)
-			for i, p := range pairs {
-				en, err := kokoro(ctx, p.En)
-				if err != nil {
-					return err
-				}
-				ja, err := voicevox(ctx, p.Ja)
-				if err != nil {
-					return err
-				}
-				if err := os.WriteFile(SegmentPath(dir, ai, i-1, "en"), en, 0o644); err != nil {
-					return err
-				}
-				if err := os.WriteFile(SegmentPath(dir, ai, i-1, "ja"), ja, 0o644); err != nil {
+			if err := synthesize(ctx, a.Title, TitlePath(dir, ai, "en"), TitlePath(dir, ai, "ja")); err != nil {
+				return err
+			}
+			for si, s := range a.Sentences {
+				if err := synthesize(ctx, s, SentencePath(dir, ai, si, "en"), SentencePath(dir, ai, si, "ja")); err != nil {
 					return err
 				}
 			}
 		}
 	}
 	return nil
+}
+
+func synthesize(ctx context.Context, p translate.Pair, enPath, jaPath string) error {
+	en, err := kokoro(ctx, p.En)
+	if err != nil {
+		return err
+	}
+	ja, err := voicevox(ctx, p.Ja)
+	if err != nil {
+		return err
+	}
+	if err := os.WriteFile(enPath, en, 0o644); err != nil {
+		return err
+	}
+	return os.WriteFile(jaPath, ja, 0o644)
 }
 
 func kokoro(ctx context.Context, text string) ([]byte, error) {
