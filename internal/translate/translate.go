@@ -98,3 +98,15 @@ func claude(ctx context.Context, article []byte) (*output, error) {
 	}
 	return res.StructuredOutput, nil
 }
+
+func ReadLevel(dir, level string) ([]Article, error) {
+	b, err := os.ReadFile(filepath.Join(dir, level+".json"))
+	if err != nil {
+		return nil, err
+	}
+	var articles []Article
+	if err := json.Unmarshal(b, &articles); err != nil {
+		return nil, err
+	}
+	return articles, nil
+}

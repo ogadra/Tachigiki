@@ -10,6 +10,7 @@ import (
 	"github.com/ogadra/Tachigiki/internal/fetch"
 	_ "github.com/ogadra/Tachigiki/internal/fetch/adapters"
 	"github.com/ogadra/Tachigiki/internal/translate"
+	"github.com/ogadra/Tachigiki/internal/tts"
 )
 
 func main() {
@@ -18,6 +19,7 @@ func main() {
 	day := now.Format(time.DateOnly)
 	rawDir := filepath.Join("data", "raw", day)
 	scriptDir := filepath.Join("data", "script", day)
+	audioDir := filepath.Join("data", "audio", day)
 
 	sources, err := config.Load(".")
 	if err != nil {
@@ -27,6 +29,9 @@ func main() {
 		log.Fatal(err)
 	}
 	if err := translate.Run(ctx, rawDir, scriptDir); err != nil {
+		log.Fatal(err)
+	}
+	if err := tts.Run(ctx, scriptDir, audioDir); err != nil {
 		log.Fatal(err)
 	}
 }
