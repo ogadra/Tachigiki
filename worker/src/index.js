@@ -1,13 +1,11 @@
-// R2のファイルとWebプレイヤーを返す。認可はCloudflare Accessに任せ、Access経由のリクエストかだけを見る。
 export default {
   async fetch(request, env) {
-    // ponytail: ヘッダーの有無だけを見る。Access以外の経路 (workers.dev、プレビューURL) は wrangler.jsonc で塞いでいる。経路が増えたらJWTの署名とaudを検証する
-    if (!request.headers.has("Cf-Access-Jwt-Assertion")) {
+    if (!cameThroughAccess(request)) {
       return new Response("Forbidden", { status: 403 });
     }
     const { pathname } = new URL(request.url);
     if (pathname === "/data/days") {
-      return days(env.BUCKET);
+      return listDates(env.BUCKET);
     }
     if (pathname.startsWith("/data/")) {
       return object(env.BUCKET, pathname.slice("/data/".length), request.headers);
@@ -16,14 +14,14 @@ export default {
   },
 };
 
-// R2のキーは {date}/{level}/... なので、先頭のprefixが日付の一覧になる。
-async function days(bucket) {
-  const list = await bucket.list({ delimiter: "/" });
-  const dates = list.delimitedPrefixes
-    .map((p) => p.slice(0, -1))
-    .sort()
-    .reverse();
-  return Response.json(dates);
+function cameThroughAccess(request) {
+  return request.headers.has("Cf-Access-Jwt-Assertion");
+}
+
+async function listDates(bucket) {
+  const topLevel = await bucket.list({ delimiter: "/" });
+  const dates = topLevel.delimitedPrefixes.map((dateDir) => dateDir.replace(/\/$/, ""));
+  return Response.json(dates.sort().reverse());
 }
 
 async function object(bucket, key, headers) {
