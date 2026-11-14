@@ -1,7 +1,7 @@
 const $ = (id) => document.getElementById(id);
 const audio = $("audio");
 let script = { articles: [] };
-let spans = []; // [{start, end, el}] 再生位置の昇順
+let spans = [];
 
 async function load() {
   const res = await fetch(`/data/${$("day").value}/${$("level").value}/script.json`);
@@ -13,11 +13,10 @@ async function load() {
   audio.src = `/data/${script.date}/${script.level}/audio.m4a`;
   audio.playbackRate = Number($("rate").value);
   render();
-  captions();
+  setCaptions();
 }
 
-// ページに出している英文と和訳を、audio の字幕としても渡す
-function captions() {
+function setCaptions() {
   const time = (t) => new Date(t * 1000).toISOString().slice(11, 23);
   const cues = spans.map((s) => `${time(s.start)} --> ${time(s.end)}\n${s.el.textContent}`);
   const vtt = `WEBVTT\n\n${cues.join("\n\n")}\n`;
@@ -68,18 +67,26 @@ audio.addEventListener("timeupdate", () => {
   active = cur;
 });
 
-function skipArticle(dir) {
-  const starts = script.articles.map((a) => a.start);
-  const t = audio.currentTime;
-  // 前へは記事の頭から2秒以内なら1つ前の記事へ、それ以降なら今の記事の頭へ戻す
-  const target = dir > 0 ? starts.find((s) => s > t) : (starts.findLast((s) => s < t - 2) ?? 0);
-  if (target !== undefined) seek(target);
+const PREVIOUS_ARTICLE_WITHIN_SECONDS = 2;
+
+function articleStarts() {
+  return script.articles.map((a) => a.start);
+}
+
+function nextArticle() {
+  const next = articleStarts().find((start) => start > audio.currentTime);
+  if (next !== undefined) seek(next);
+}
+
+function previousArticle() {
+  const earlier = articleStarts().filter((start) => start < audio.currentTime - PREVIOUS_ARTICLE_WITHIN_SECONDS);
+  seek(earlier.at(-1) ?? 0);
 }
 
 navigator.mediaSession?.setActionHandler("play", () => audio.play());
 navigator.mediaSession?.setActionHandler("pause", () => audio.pause());
-navigator.mediaSession?.setActionHandler("previoustrack", () => skipArticle(-1));
-navigator.mediaSession?.setActionHandler("nexttrack", () => skipArticle(1));
+navigator.mediaSession?.setActionHandler("previoustrack", () => previousArticle());
+navigator.mediaSession?.setActionHandler("nexttrack", () => nextArticle());
 audio.addEventListener("play", () => {
   navigator.mediaSession.metadata = new MediaMetadata({ title: `Tachigiki ${script.date}`, artist: script.level });
 });
