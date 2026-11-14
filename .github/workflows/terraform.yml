@@ -1,0 +1,20 @@
+name: terraform
+
+on:
+  push:
+    paths: ["**.tf", "**/.terraform.lock.hcl"]
+  pull_request:
+    paths: ["**.tf", "**/.terraform.lock.hcl"]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform
+    steps:
+      - uses: actions/checkout@v7
+      - uses: hashicorp/setup-terraform@v4
+      - run: terraform fmt -check -recursive
+      - run: terraform init -backend=false
+      - run: terraform validate
