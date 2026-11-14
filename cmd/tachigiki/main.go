@@ -1,17 +1,25 @@
 package main
 
 import (
+	"context"
 	"log"
+	"path/filepath"
 	"time"
 
 	"github.com/ogadra/Tachigiki/internal/config"
+	"github.com/ogadra/Tachigiki/internal/fetch"
+	_ "github.com/ogadra/Tachigiki/internal/fetch/adapters"
 )
 
 func main() {
-	day := time.Now().In(time.FixedZone("JST", 9*60*60)).Format("2006-01-02")
+	ctx := context.Background()
+	now := time.Now().In(time.FixedZone("JST", 9*60*60))
+	day := now.Format(time.DateOnly)
 	sources, err := config.Load(".")
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("%s: %d sources", day, len(sources))
+	if err := fetch.Run(ctx, now, sources, filepath.Join("data", "raw", day)); err != nil {
+		log.Fatal(err)
+	}
 }
