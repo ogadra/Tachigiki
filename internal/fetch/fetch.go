@@ -1,4 +1,3 @@
-// Package fetch は取得元ごとのアダプタで当日の記事を取得し、data/raw/{date}/ に書き出す。
 package fetch
 
 import (
@@ -22,6 +21,11 @@ import (
 )
 
 const (
+	KindArticle         = "article"
+	KindPressConference = "press_conference"
+)
+
+const (
 	userAgent    = "Tachigiki"
 	hostInterval = time.Second
 	maxArticles  = 3
@@ -31,18 +35,16 @@ type Article struct {
 	SourceID    string    `json:"source_id"`
 	URL         string    `json:"url"`
 	Lang        string    `json:"lang"`
-	Kind        string    `json:"kind"` // article | press_conference
+	Kind        string    `json:"kind"`
 	Title       string    `json:"title"`
 	Body        string    `json:"body"`
 	PublishedAt time.Time `json:"published_at"`
 }
 
-// Adapter は day (JST の当日) に公開された記事を返す。
 type Adapter func(ctx context.Context, src config.Source, day time.Time) ([]Article, error)
 
 var adapters = map[string]Adapter{}
 
-// Register はアダプタを kind の名前で登録する。adapters パッケージの各ファイルの init() から呼ぶ。
 func Register(kind string, a Adapter) {
 	if _, ok := adapters[kind]; ok {
 		panic("fetch: adapter registered twice: " + kind)
@@ -50,7 +52,6 @@ func Register(kind string, a Adapter) {
 	adapters[kind] = a
 }
 
-// Run は全取得元の記事を取得し、dir に {source_id}-{n}.json で書き出す。
 func Run(ctx context.Context, day time.Time, sources []config.Source, dir string) error {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return err
@@ -88,8 +89,6 @@ var (
 	lastSeen = map[string]time.Time{}
 )
 
-// Get は robots.txt を守り、同じホストへのリクエストを hostInterval 以上空けて GET する。
-// ponytail: 全体を1つの mutex で直列化している。取得元が増えて遅くなったらホストごとのロックにする
 func Get(ctx context.Context, rawURL string) ([]byte, error) {
 	u, err := url.Parse(rawURL)
 	if err != nil {
@@ -99,7 +98,7 @@ func Get(ctx context.Context, rawURL string) ([]byte, error) {
 	defer mu.Unlock()
 	r, ok := robots[u.Host]
 	if !ok {
-		status, body, err := get(ctx, u.Scheme+"://"+u.Host+"/robots.txt")
+		status, body, err := request(ctx, u.Scheme+"://"+u.Host+"/robots.txt")
 		if err != nil {
 			return nil, err
 		}
@@ -111,7 +110,7 @@ func Get(ctx context.Context, rawURL string) ([]byte, error) {
 	if !r.TestAgent(u.RequestURI(), userAgent) {
 		return nil, fmt.Errorf("%s: disallowed by robots.txt", rawURL)
 	}
-	status, body, err := get(ctx, rawURL)
+	status, body, err := request(ctx, rawURL)
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +123,7 @@ func Get(ctx context.Context, rawURL string) ([]byte, error) {
 	return body, nil
 }
 
-func get(ctx context.Context, rawURL string) (int, []byte, error) {
+func request(ctx context.Context, rawURL string) (int, []byte, error) {
 	u, _ := url.Parse(rawURL)
 	if wait := hostInterval - time.Since(lastSeen[u.Host]); wait > 0 {
 		time.Sleep(wait)
@@ -144,7 +143,6 @@ func get(ctx context.Context, rawURL string) (int, []byte, error) {
 	return res.StatusCode, body, err
 }
 
-// ExtractBody はページの本文を取り出す。
 func ExtractBody(page []byte, rawURL string) (string, error) {
 	u, err := url.Parse(rawURL)
 	if err != nil {
