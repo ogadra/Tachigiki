@@ -14,6 +14,7 @@
         packages = with pkgs; [
           go
           nodejs
+          pnpm
           ffmpeg
           wrangler
           terraform

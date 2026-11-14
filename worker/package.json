@@ -2,6 +2,7 @@
   "name": "tachigiki-worker",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@12.9.0",
   "engines": {
     "node": "24"
   },
