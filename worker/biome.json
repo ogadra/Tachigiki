@@ -1,0 +1,4 @@
+{
+  "files": { "includes": ["src/**", "public/**"] },
+  "formatter": { "indentStyle": "space", "lineWidth": 120 }
+}
