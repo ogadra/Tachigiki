@@ -39,6 +39,7 @@ async function object(bucket, key, headers) {
   if (!headers.has("range")) {
     return new Response(obj.body, { headers: res });
   }
+  console.log("RANGE", JSON.stringify(obj.range), typeof obj.range, obj.range && Object.keys(obj.range));
   const { offset, length } = byteRange(obj.range, obj.size);
   res.set("content-range", `bytes ${offset}-${offset + length - 1}/${obj.size}`);
   res.set("content-length", String(length));
@@ -46,7 +47,7 @@ async function object(bucket, key, headers) {
 }
 
 export function byteRange(range, size) {
-  if ("suffix" in range) {
+  if (range.suffix !== undefined) {
     return { offset: size - range.suffix, length: range.suffix };
   }
   const offset = range.offset ?? 0;

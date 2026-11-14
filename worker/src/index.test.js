@@ -16,7 +16,7 @@ test("rejects requests that did not come through Access", async () => {
 test("answers a Range request with 206 and Content-Range", async () => {
   const obj = {
     size: 100,
-    range: { offset: 10 },
+    range: { offset: 10, length: 90, suffix: undefined },
     body: "rest",
     httpEtag: '"e"',
     writeHttpMetadata: () => {},
