@@ -1,1 +1,44 @@
-<!doctype html><title>Tachigiki</title>
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tachigiki</title>
+    <style>
+      :root { color-scheme: light dark; --hl: #ffe58a; --hl-text: #000; }
+      body { font-family: system-ui, sans-serif; margin: 0 auto; max-width: 720px; padding: 0 16px 120px; line-height: 1.6; }
+      header { position: sticky; top: 0; background: Canvas; padding: 8px 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+      audio { width: 100%; }
+      h2 { font-size: 1.1rem; margin-top: 2rem; }
+      .sentence { display: block; width: 100%; text-align: left; border: 0; background: none; font: inherit; color: inherit; padding: 6px 4px; border-radius: 4px; cursor: pointer; }
+      .sentence span { display: block; }
+      .sentence .ja { opacity: 0.75; font-size: 0.95em; }
+      .sentence .active { background: var(--hl); color: var(--hl-text); }
+    </style>
+  </head>
+  <body>
+    <header>
+      <label>日付 <select id="day"></select></label>
+      <label>レベル
+        <select id="level">
+          <option value="a2">中学</option>
+          <option value="b1">高校</option>
+          <option value="b2">大学</option>
+        </select>
+      </label>
+      <label>速度
+        <select id="rate">
+          <option>0.75</option>
+          <option selected>1</option>
+          <option>1.25</option>
+          <option>1.5</option>
+        </select>
+      </label>
+      <audio id="audio" controls preload="metadata">
+        <track id="captions" kind="captions" srclang="ja" label="英文と和訳" default />
+      </audio>
+    </header>
+    <main id="articles"></main>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
