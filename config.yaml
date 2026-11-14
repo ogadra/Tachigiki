@@ -1,0 +1,20 @@
+sources:
+  - id: kantei-chokan
+    kind: kantei_press
+    lang: ja
+  - id: globalvoices
+    kind: rss
+    url: https://globalvoices.org/feed/
+    lang: en
+  - id: nasa
+    kind: rss
+    url: https://www.nasa.gov/news-release/feed/
+    lang: en
+  - id: whitehouse
+    kind: rss
+    url: https://www.whitehouse.gov/briefings-statements/feed/
+    lang: en
+  - id: kantei-news
+    kind: rss
+    url: https://www.kantei.go.jp/index-jnews.rdf
+    lang: ja
