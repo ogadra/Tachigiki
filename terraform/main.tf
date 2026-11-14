@@ -6,7 +6,6 @@ terraform {
     }
   }
 
-  # bucket と endpoints はアカウントごとに違うので、terraform init -backend-config=backend.hcl で渡す
   backend "s3" {
     key                         = "tachigiki.tfstate"
     region                      = "auto"
