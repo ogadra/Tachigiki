@@ -1,4 +1,3 @@
-// Package publish は当日の音声とscript.jsonを wrangler でR2にアップロードする。
 package publish
 
 import (
@@ -18,7 +17,6 @@ var files = map[string]string{
 	"script.json": "application/json",
 }
 
-// Run は outDir/{level}/ のファイルを R2 の {day}/{level}/ に置く。
 func Run(ctx context.Context, day, outDir string) error {
 	for _, lv := range translate.Levels {
 		for name, contentType := range files {
