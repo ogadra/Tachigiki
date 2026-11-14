@@ -1,4 +1,3 @@
-// Package translate は記事ごとに Claude Code を headless で呼び、レベルごとの英文と和訳のペアを作る。
 package translate
 
 import (
@@ -35,7 +34,6 @@ type output struct {
 	Levels map[string][]Article `json:"levels"`
 }
 
-// Run は rawDir の記事をすべて訳し、outDir に {level}.json を書き出す。
 func Run(ctx context.Context, rawDir, outDir string) error {
 	files, err := filepath.Glob(filepath.Join(rawDir, "*.json"))
 	if err != nil {
