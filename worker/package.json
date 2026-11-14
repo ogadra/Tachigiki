@@ -1,0 +1,16 @@
+{
+  "name": "tachigiki-worker",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "24"
+  },
+  "scripts": {
+    "lint": "biome check .",
+    "test": "node --test",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.7"
+  }
+}

@@ -28,6 +28,7 @@
         default = pkgs.mkShell {
           packages = with pkgs; [
             go
+            nodejs
             ffmpeg
             wrangler
             terraform
