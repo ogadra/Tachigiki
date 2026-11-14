@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/ogadra/Tachigiki/internal/assemble"
 	"github.com/ogadra/Tachigiki/internal/config"
 	"github.com/ogadra/Tachigiki/internal/fetch"
 	_ "github.com/ogadra/Tachigiki/internal/fetch/adapters"
@@ -20,6 +21,7 @@ func main() {
 	rawDir := filepath.Join("data", "raw", day)
 	scriptDir := filepath.Join("data", "script", day)
 	audioDir := filepath.Join("data", "audio", day)
+	outDir := filepath.Join("data", "out", day)
 
 	sources, err := config.Load(".")
 	if err != nil {
@@ -32,6 +34,9 @@ func main() {
 		log.Fatal(err)
 	}
 	if err := tts.Run(ctx, scriptDir, audioDir); err != nil {
+		log.Fatal(err)
+	}
+	if err := assemble.Run(ctx, day, scriptDir, audioDir, outDir); err != nil {
 		log.Fatal(err)
 	}
 }
