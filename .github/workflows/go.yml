@@ -6,6 +6,9 @@ on:
   pull_request:
     paths: ["**.go", "go.mod", "go.sum"]
 
+permissions:
+  contents: read
+
 jobs:
   check:
     runs-on: ubuntu-latest
