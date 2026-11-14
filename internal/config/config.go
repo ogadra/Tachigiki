@@ -1,4 +1,3 @@
-// Package config はリポジトリ内の config.yaml をすべて探して読む。
 package config
 
 import (
@@ -21,7 +20,8 @@ type file struct {
 	Sources []Source `yaml:"sources"`
 }
 
-// Load は root 以下の config.yaml をすべて読み、sources を1つの一覧にまとめる。
+var skippedDirs = map[string]bool{"data": true, "node_modules": true}
+
 func Load(root string) ([]Source, error) {
 	var sources []Source
 	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
@@ -29,8 +29,8 @@ func Load(root string) ([]Source, error) {
 			return err
 		}
 		if d.IsDir() {
-			// data/ は出力先、node_modules/ は Worker の依存で、どちらにも他人の config.yaml が入りうる
-			if path != root && (strings.HasPrefix(d.Name(), ".") || d.Name() == "data" || d.Name() == "node_modules") {
+			hidden := strings.HasPrefix(d.Name(), ".")
+			if path != root && (hidden || skippedDirs[d.Name()]) {
 				return filepath.SkipDir
 			}
 			return nil
