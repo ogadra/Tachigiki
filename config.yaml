@@ -1,6 +1,7 @@
 sources:
   - id: kantei-chokan
     kind: kantei_press
+    url: https://www.kantei.go.jp/jp/tyoukanpress/
     lang: ja
   - id: globalvoices
     kind: rss

@@ -1,4 +1,3 @@
-// Package adapters は fetch のアダプタを1ファイル1アダプタで置く。ファイルを置くと init() で登録される。
 package adapters
 
 import (
@@ -39,7 +38,7 @@ func rss(ctx context.Context, src config.Source, day time.Time) ([]fetch.Article
 			SourceID:    src.ID,
 			URL:         item.Link,
 			Lang:        src.Lang,
-			Kind:        "article",
+			Kind:        fetch.KindArticle,
 			Title:       item.Title,
 			Body:        body,
 			PublishedAt: *item.PublishedParsed,

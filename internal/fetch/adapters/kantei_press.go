@@ -12,13 +12,11 @@ import (
 
 func init() { fetch.Register("kantei_press", kanteiPress) }
 
-// kanteiPress は首相官邸の内閣官房長官記者会見の会見録を、当日の午前 (a) と午後 (p) の分だけ取得する。
 func kanteiPress(ctx context.Context, src config.Source, day time.Time) ([]fetch.Article, error) {
 	var out []fetch.Article
-	for _, half := range []string{"a", "p"} {
-		u := fmt.Sprintf("https://www.kantei.go.jp/jp/tyoukanpress/%s/%d_%s.html", day.Format("200601"), day.Day(), half)
+	for _, session := range []string{"a", "p"} {
+		u := fmt.Sprintf("%s%s/%d_%s.html", src.URL, day.Format("200601"), day.Day(), session)
 		page, err := fetch.Get(ctx, u)
-		// 会見のない日や時間帯はページ自体がない
 		if errors.Is(err, fetch.ErrNotFound) {
 			continue
 		}
@@ -32,8 +30,8 @@ func kanteiPress(ctx context.Context, src config.Source, day time.Time) ([]fetch
 		out = append(out, fetch.Article{
 			SourceID:    src.ID,
 			URL:         u,
-			Lang:        "ja",
-			Kind:        "press_conference",
+			Lang:        src.Lang,
+			Kind:        fetch.KindPressConference,
 			Title:       "内閣官房長官記者会見",
 			Body:        body,
 			PublishedAt: day,
